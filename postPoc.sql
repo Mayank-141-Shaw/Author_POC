@@ -98,32 +98,17 @@ select * from post;
 select * from comment;
 
 # Get list of Posts with latest 10 comments of each post authored by 'James Bond'
-select p.id as postid, c.id as commentid, p.name as post, c.content as latest_comment from post p
-inner join 
-(select * from comment 
-	where postid in (select id from post 
-		where authorid = (select id from author where name='James Bond') 
-	)
-    
-) c 
-on p.id = c.postid
-order by c.createdts desc;
-
-
-
-
-        
-
+     
 with a as(
-	select * from post
+	select id as postid, name as postname, authorid from post
     where authorid = (select id from author where name='James Bond')
 ), b as (
-	select postid, id as commentid, 
+	select postid, id as commentid, content, 
 		row_number() over (partition by postid order by id desc) as rownum
 	from comment
 )
-select * 
+select a.postid as postid, postname, authorid, commentid, content, rownum
 from a 
 left join b
-on b.postid = a.id
+on b.postid = a.postid
 where b.rownum <= 10;
